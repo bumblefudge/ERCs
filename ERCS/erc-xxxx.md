@@ -71,8 +71,119 @@ Each of these partitioned permissioning namespaces can include 0 or more address
 The biggest deployment to date of a [CAIP-25]-based connection is the websocket-based connection that the Wallet-Connect SDK has bootstrapped since v2.0, so this connection is sometimes referred to as a "Wallet-Connect connection".
 
 [CAIP-27] defines an envelope for wallet<>dapp RPC calls, routing them to the appropriate "permission partition" (whether across a relay architecture, variously stateful components, variously on-chain component, etc).
+This enables concurrent, segmented channels to nodes of multiple chains (or even chains operating different virtual machines and RPC dictionaries), multiplexed by the wallet (or even across multiple wallets).
+This breaks from the long-dominant model codified in [ERC-3326] of wallets maintaining "focus" (in user-experience terms) on one chain at a time, allowing instead for multiple chains to be involved in a given transaction approval or user interaction smoothly, getting up-to-the-current-block information about all the relevant chains in parallel.
 
-### Browser Extensions and Manifest V3
+It is important to note that each of these parallel connections has a unique and very explicitly defined scope of one or more specific chains (identified in ways specific to each "namespace" of chains, usually the identification system of a given virtual machine or "layer 1" chain).
+These identifiers are defined in [CAIP-2] and are tuples of a "namespace" (usually a "shortname" for a registry of chainIds) and a chainId within that namespace.
+You could think of these are context-specified chainIds, to disambiguate in case of collisions such as `mainnet` or `1` being used in multiple distinct ecosystems.
+The specification for these "shortnames" (including information on how community developers can contribute light/summary documentation of each namespace and the applicability to it of each CAIP) can be found in [CAIP-104].
+
+For each distinct, partioned connection within a [CAIP-25] connection, a kind of configuration object exists, specified in [CAIP-217], outlining the RPC methods (and notifications) authorized, the [chain-specified CAIP-10][CAIP-10] addresses authorized for that scope.
+Note that if identical configurations are specified for multiple chains, a "compact" expression is possible listing these in a top-level array of strings called `references` of a connection scoped to an entire namespace, rather than having multiple identical objects each scoped to a single chain.
+
+#### Example CAIP-25 request
+
+The following is an example taken from the [CAIP-25] specification, which is instructive for all of the above:
+
+```JSON
+{
+  "id": 1,
+  "jsonrpc": "2.0",
+  "method": "wallet_createSession",
+  "params": {
+    "requiredScopes": {
+      "eip155": {
+        "references": ["1", "137"],
+        "methods": ["eth_sendTransaction", "eth_signTransaction", "eth_sign", "get_balance", "personal_sign"],
+        "notifications": ["accountsChanged", "chainChanged"]
+      },
+      "eip155:10": {
+        "methods": ["get_balance"],
+        "notifications": ["accountsChanged", "chainChanged"]
+      },
+      "eip155:0": {
+        "methods": ["wallet_getPermissions", "wallet_creds_store", "wallet_creds_verify", "wallet_creds_issue", "wallet_creds_present"],
+        "notifications": []
+      },
+      "cosmos": {
+        ...
+      }
+    },
+    "optionalScopes":{
+      "eip155:42161": {
+        "methods": ["eth_sendTransaction", "eth_signTransaction", "get_balance", "personal_sign"],
+        "notifications": ["accountsChanged", "chainChanged"]
+    },
+    "scopedProperties": {
+      "eip155:42161": {
+        "extension_foo": "bar"    
+      }
+    },
+    "sessionProperties": {
+      "expiry": "2022-12-24T17:07:31+00:00",
+      "caip154-mandatory": "true"
+    }
+  }
+}
+```
+#### Example CAIP-25 response
+
+```JSON
+{
+  "id": 1,
+  "jsonrpc": "2.0",
+  "result": {
+    "sessionId": "0xdeadbeef",
+    "sessionScopes": {
+      "eip155": {
+        "references": ["1", "137"],
+        "methods": ["eth_sendTransaction", "eth_signTransaction", "get_balance", "eth_sign", "personal_sign"]
+        "notifications": ["accountsChanged", "chainChanged"],
+        "accounts": ["eip155:1:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb", "eip155:137:0xab16a96d359ec26a11e2c2b3d8f8b8942d5bfcdb"]
+      },
+      "eip155:10": {
+        "methods": ["get_balance"],
+        "notifications": ["accountsChanged", "chainChanged"],
+        "accounts": []
+      },
+      "eip155:42161": {
+        "methods": ["personal_sign"],
+        "notifications": ["accountsChanged", "chainChanged"],
+        "accounts":["eip155:42161:0x0910e12C68d02B561a34569E1367c9AAb42bd810"],
+        "rpcDocuments": "https://example.com/wallet_extension.json"
+      },
+      "eip155:0": {
+        "methods": ["wallet_getPermissions", "wallet_creds_store", "wallet_creds_verify", "wallet_creds_issue", "wallet_creds_present"],
+        "notifications": []
+      },
+      "cosmos": {
+        ...
+      }
+    },      
+    "scopedProperties": {
+      "eip155:42161": {
+        "walletExtensionConfig": {
+          "foo": "bar"
+        }
+      }
+    },
+    "sessionProperties": {
+      "expiry": "2022-11-31T17:07:31+00:00",
+      "globalConfig": {
+          "foo": "bar"
+      }
+    }
+  }
+}
+```
+
+In this example:
+1. the wallet has added `accounts` arrays to some, but not all, of the parallel connections it has authorized, some empty.
+2. no `accounts` have been authorized for the `eip155:0` connection, which refers not to an Ethereum chain but to the dapp<>wallet connection itself, as per the "chainId 0" convention specified in [the Ethereum profile of CAIP-2](https://namespaces.chainagnostic.org/eip155/caip10#special-case-of-eoa).
+3. the response merges connections requested as "required" and connections requested as "optional"; wallets can opt to fail on unsupported (or unrecognized) connections marked as required, but are encouraged to drop any unsupported (or unrecognized) optional connections silently.
+
+### Future Work: Browser Extensions and Manifest V3
 
 TBD
 
@@ -87,12 +198,18 @@ TBD
 
 Copyright and related rights waived via [CC0](../LICENSE.md).
 
+[CAIP-2]: https://chainagnostic.org/CAIPs/caip-2
+[CAIP-10]: https://chainagnostic.org/CAIPs/caip-10
 [CAIP-25]: https://chainagnostic.org/CAIPs/caip-25
 [CAIP-27]: https://chainagnostic.org/CAIPs/caip-27
+[CAIP-104]: https://chainagnostic.org/CAIPs/caip-104
+[CAIP-217]: https://chainagnostic.org/CAIPs/caip-27
 [EIP-1193]: https://eips.ethereum.org/EIPS/eip-1193
 [EIP-3085]: https://eips.ethereum.org/EIPS/eip-3085
+[EIP-3326]: https://eips.ethereum.org/EIPS/eip-3326
 [EIP-5792]: https://eips.ethereum.org/EIPS/eip-5792
 [EIP-6963]: https://eips.ethereum.org/EIPS/eip-6963
 [EIP-7702]: https://eips.ethereum.org/EIPS/eip-7702
 [EIP-7710]: https://eips.ethereum.org/EIPS/eip-7710
 [EIP-7715]: https://eips.ethereum.org/EIPS/eip-7715
+[namespaces]: https://namespaces.chainagnostic.org
