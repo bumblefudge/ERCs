@@ -81,6 +81,8 @@ The specification for these "shortnames" (including information on how community
 
 For each distinct, partioned connection within a [CAIP-25] connection, a kind of configuration object exists, specified in [CAIP-217], outlining the RPC methods (and notifications) authorized, the [chain-specified CAIP-10][CAIP-10] addresses authorized for that scope.
 Note that if identical configurations are specified for multiple chains, a "compact" expression is possible listing these in a top-level array of strings called `references` of a connection scoped to an entire namespace, rather than having multiple identical objects each scoped to a single chain.
+These configuration objects are rigidly typed and unknown properties should be considered unsafe and dropped.
+Free-form extensibility does exist, however, in the `scopedProperties` object, where configuration flags, intents, capability objects, etc can be passed; these are partitioned by connection, and any superfluous objects that do not correspond to an authorized connection should be dropped.
 
 #### Example CAIP-25 request
 
@@ -114,10 +116,18 @@ The following is an example taken from the [CAIP-25] specification, which is ins
       "eip155:42161": {
         "methods": ["eth_sendTransaction", "eth_signTransaction", "get_balance", "personal_sign"],
         "notifications": ["accountsChanged", "chainChanged"]
+      },
+      "eip155:666666": {
+        "methods": ["eth_sendTransactionGoblinMode", "eth_signTransaction", "get_balance", "personal_sign"],
+        "notifications": ["accountsRandomized", "replayAttackImminent"]
+      },
     },
     "scopedProperties": {
       "eip155:42161": {
         "extension_foo": "bar"    
+      },
+      "eip155:666666": {
+        "goblinMode": "true"    
       }
     },
     "sessionProperties": {
@@ -182,6 +192,7 @@ In this example:
 1. the wallet has added `accounts` arrays to some, but not all, of the parallel connections it has authorized, some empty.
 2. no `accounts` have been authorized for the `eip155:0` connection, which refers not to an Ethereum chain but to the dapp<>wallet connection itself, as per the "chainId 0" convention specified in [the Ethereum profile of CAIP-2](https://namespaces.chainagnostic.org/eip155/caip10#special-case-of-eoa).
 3. the response merges connections requested as "required" and connections requested as "optional"; wallets can opt to fail on unsupported (or unrecognized) connections marked as required, but are encouraged to drop any unsupported (or unrecognized) optional connections silently.
+4. an entire optional connection was dropped from the response as it was not authorized by the wallet, and the corresponding `scopedProperties` object annotating this connection was also dropped.
 
 ### Future Work: Browser Extensions and Manifest V3
 
