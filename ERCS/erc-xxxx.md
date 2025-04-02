@@ -26,60 +26,13 @@ We can establish some terminology upfront to make the following history more cle
 Also:
 
 * **Multi-Chain** refers to transactions, sessions, or other interactions (on-chain or off-) involving two chains (or subgraphs) of a given protocol, whether these involve oracles, bridges, dual-chain nodes, or multiple nodes. For example, a transaction altering state on both Ethereum Mainnet and Base is considered a multi-chain transaction.
-* **Multi-VM** refers to transactions, sessions, or other interactions involving two chains (or subgraphs) of independent protocols. For example, swapping an asset on Ethereum for one on Solana is a multi-VM interaction, and one rarely specified publicly.
-
-### Scopes in the C.A.S.A. Model
-
-The following diagram conveys the CASA URI scheme for multi-VM and multi-chain addressing, by analogy to familiar web URLs:
-
-┌────────────────────────────────────────────────────────┐
-│Virtual Machine: assumptions,about runtime  actors, etc │
-│Ex: btc, eip155 (ethereum), solana, cosmos              │
-│┌─────────────────────────────────────────────────────┐ │
-││"Chains": Addressable authorities for public data    │ │
-││Ex: Mainnet, test-nets, private ledgers, sub-graphs  │ │
-││┌──────────────────────────────────────────────────┐ │ │
-│││On-chain entities: Addressable state              │ │ │
-│││Ex: Contracts, registries, wallets, transactions  │ │ │
-│││┌───────────────────────────────────────────────┐ │ │ │
-││││On-chain sub-entities: VM-specific data        │ │ │ │
-││││Ex: A specific NFT or registry entry, metadata │ │ │ │
-││││                                               │ │ │ │
-│││└───────────────────────────────────────────────┘ │ │ │
-││└──────────────────────────────────────────────────┘ │ │
-│└─────────────────────────────────────────────────────┘ │
-└────────────────────────────────────────────────────────┘
-┌────────────────────────────────────────────────────────┐
-│The Open HTTP(S) Web                                    │
-│┌─────────────────────────────────────────────────────┐ │
-││Authority: Live server at the root of all URLs       │ │
-││┌──────────────────────────────────────────────────┐ │ │
-│││Online entities: Resources, inboxes, endpoints    │ │ │
-│││ addressed via an authority                       │ │ │
-│|│┌───────────────────────────────────────────────┐ │ │ |
-││││Sub-Resources and "Assets"                     │ │ │ │
-│││└───────────────────────────────────────────────┘ │ │ │
-││└──────────────────────────────────────────────────┘ │ │
-│└─────────────────────────────────────────────────────┘ │
-└────────────────────────────────────────────────────────┘
-
-## Introduction
-
-We can establish some terminology upfront to make the following history more clear:
-
-1. **Virtual Machine** refers to broad family tree of each blockchain or DAG ecosystem, commonly called a "protocol" that governs all variants, forks, and "Layer 2"/layer-X instances of that protocol. By this logic, all BTC forks are considered instances of the Bitcoin protocol, and all Polkadot chains (even if not addressable from a public coordination chain) are instances of the Polkadot VM.
-2. **Chains** refer to discreet units of addressable state, which in Ethereum and most blockchain virtuam machines are called "chains" or "ledgers" and are addressable by some static or dynamic numbering/naming system. In some virtual machines like DAGs and DHTs, the unit of addressable partition can be subgraphs or shards rather than monotonic chains.
-3. **On-Chain Data** refer to actors or resources specific to (and canonical for) a given "chain". Reading, writing, or otherwise interacting with these resources or actors is only possible in the context of a live connection to a participating node of that network.
-
-Also:
-
-* **Multi-Chain** refers to transactions, sessions, or other interactions (on-chain or off-) involving two chains (or subgraphs) of a given protocol, whether these involve oracles, bridges, dual-chain nodes, or multiple nodes. For example, a transaction altering state on both Ethereum Mainnet and Base is considered a multi-chain transaction.
 * **Multi-VM** refers to transactions, sessions, or other interactions involving two chains (or subgraphs) of independent protocols. For example, swapping an asset on Ethereum for one on Solana is a multi-VM interaction, and one rarely specified interoperably or subject to direct public discussion and influence.
 
 ### Scopes in the Chain-Agnostic Model
 
 The following diagram conveys the CASA URI scheme for multi-VM and multi-chain addressing, by analogy to familiar web URLs:
 
+```bash
 ┌────────────────────────────────────────────────────────┐
 │Virtual Machine: assumptions,about runtime  actors, etc │
 │Ex: btc, eip155 (ethereum), solana, cosmos              │
@@ -110,6 +63,7 @@ The following diagram conveys the CASA URI scheme for multi-VM and multi-chain a
 ││└──────────────────────────────────────────────────┘ │ │
 │└─────────────────────────────────────────────────────┘ │
 └────────────────────────────────────────────────────────┘
+```
 
 Applying the general URI scheme defined above, actors and resources are addressed heirarchically by various URI subtypes, all of which follow the general pattern:
 
