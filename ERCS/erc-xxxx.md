@@ -127,6 +127,7 @@ the specification also details how these capabilities negotiated between an on-c
 ### CAIP-25 and friends
 
 CAIP-25 takes a more expressive approach than EIP-1193, passing complex structured objects to and from the wallet (or other user-agent) to negotiate wallet<>app connections as an interactive communication.
+These objects are essentially partitioned by "authority" (even if multiple chains are accessed via the same node, authorizations are partitioned into per-chain objects) according to the [chain-agnostic scope model](#scopes-in-the-chain-agnostic-model) diagrammed above.
 Importantly, these objects can be iterated over time with successive requests to expand or detract the scope of multiple concurrent and partitioned sub-connections, which can be on different chains or even in different VMs and thus distinct sets of RPC methods and ground-assumptions about finality, transaction flow, etc.
 Each of these partitioned permissioning namespaces can include 0 or more addresses, different sets of enabled RPC methods, and even free-form metadata in the form of `scopeProperties` (per partitioned scope) and `sessionProperties` (universal across all of them).
 The biggest deployment to date of a [CAIP-25]-based connection is the websocket-based connection that the Wallet-Connect SDK has bootstrapped since version 2.0 of their connection specification and network. For this reason, a CAIP-25 connection is sometimes referred to as a "Wallet-Connect connection".
