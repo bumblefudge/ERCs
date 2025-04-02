@@ -15,27 +15,124 @@ Since the launch of Ethereum, the development and interface-design of wallets, u
 In recent years, however, wallet UX has been experiencing something of a [perhaps still under-coordinated] renaissance, incorporating smart accounts, built-in simulations and reputation systems, and progressively abstracting multichain (and even multi-VM) mechanics.
 This document seeks to situate recent developments into a "family tree" of wallet<>dapp connections and features that build on each, to inform the development and strategic planning of wallets and applications alike.
 
+## Introduction
+
+We can establish some terminology upfront to make the following history more clear:
+
+1. **Virtual Machine** refers to broad family tree of each blockchain or DAG ecosystem, commonly called a "protocol" that governs all variants, forks, and "Layer 2"/layer-X instances of that protocol. By this logic, all BTC forks are considered instances of the Bitcoin protocol, and all Polkadot chains (even if not addressable from a public coordination chain) are instances of the Polkadot VM.
+2. **Chains** refer to discreet units of addressable state, which in Ethereum and most blockchain virtuam machines are called "chains" or "ledgers" and are addressable by some static or dynamic numbering/naming system. In some virtual machines like DAGs and DHTs, the unit of addressable partition can be subgraphs or shards rather than monotonic chains.
+3. **On-Chain Data** refer to actors or resources specific to (and canonical for) a given "chain". Reading, writing, or otherwise interacting with these resources or actors is only possible in the context of a live connection to a participating node of that network.
+
+Also:
+
+* **Multi-Chain** refers to transactions, sessions, or other interactions (on-chain or off-) involving two chains (or subgraphs) of a given protocol, whether these involve oracles, bridges, dual-chain nodes, or multiple nodes. For example, a transaction altering state on both Ethereum Mainnet and Base is considered a multi-chain transaction.
+* **Multi-VM** refers to transactions, sessions, or other interactions involving two chains (or subgraphs) of independent protocols. For example, swapping an asset on Ethereum for one on Solana is a multi-VM interaction, and one rarely specified publicly.
+
+### Scopes in the C.A.S.A. Model
+
+The following diagram conveys the CASA URI scheme for multi-VM and multi-chain addressing, by analogy to familiar web URLs:
+
+┌────────────────────────────────────────────────────────┐
+│Virtual Machine: assumptions,about runtime  actors, etc │
+│Ex: btc, eip155 (ethereum), solana, cosmos              │
+│┌─────────────────────────────────────────────────────┐ │
+││"Chains": Addressable authorities for public data    │ │
+││Ex: Mainnet, test-nets, private ledgers, sub-graphs  │ │
+││┌──────────────────────────────────────────────────┐ │ │
+│││On-chain entities: Addressable state              │ │ │
+│││Ex: Contracts, registries, wallets, transactions  │ │ │
+│││┌───────────────────────────────────────────────┐ │ │ │
+││││On-chain sub-entities: VM-specific data        │ │ │ │
+││││Ex: A specific NFT or registry entry, metadata │ │ │ │
+││││                                               │ │ │ │
+│││└───────────────────────────────────────────────┘ │ │ │
+││└──────────────────────────────────────────────────┘ │ │
+│└─────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│The Open HTTP(S) Web                                    │
+│┌─────────────────────────────────────────────────────┐ │
+││Authority: Live server at the root of all URLs       │ │
+││┌──────────────────────────────────────────────────┐ │ │
+│││Online entities: Resources, inboxes, endpoints    │ │ │
+│││ addressed via an authority                       │ │ │
+│|│┌───────────────────────────────────────────────┐ │ │ |
+││││Sub-Resources and "Assets"                     │ │ │ │
+│││└───────────────────────────────────────────────┘ │ │ │
+││└──────────────────────────────────────────────────┘ │ │
+│└─────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────┘
+
+## Introduction
+
+We can establish some terminology upfront to make the following history more clear:
+
+1. **Virtual Machine** refers to broad family tree of each blockchain or DAG ecosystem, commonly called a "protocol" that governs all variants, forks, and "Layer 2"/layer-X instances of that protocol. By this logic, all BTC forks are considered instances of the Bitcoin protocol, and all Polkadot chains (even if not addressable from a public coordination chain) are instances of the Polkadot VM.
+2. **Chains** refer to discreet units of addressable state, which in Ethereum and most blockchain virtuam machines are called "chains" or "ledgers" and are addressable by some static or dynamic numbering/naming system. In some virtual machines like DAGs and DHTs, the unit of addressable partition can be subgraphs or shards rather than monotonic chains.
+3. **On-Chain Data** refer to actors or resources specific to (and canonical for) a given "chain". Reading, writing, or otherwise interacting with these resources or actors is only possible in the context of a live connection to a participating node of that network.
+
+Also:
+
+* **Multi-Chain** refers to transactions, sessions, or other interactions (on-chain or off-) involving two chains (or subgraphs) of a given protocol, whether these involve oracles, bridges, dual-chain nodes, or multiple nodes. For example, a transaction altering state on both Ethereum Mainnet and Base is considered a multi-chain transaction.
+* **Multi-VM** refers to transactions, sessions, or other interactions involving two chains (or subgraphs) of independent protocols. For example, swapping an asset on Ethereum for one on Solana is a multi-VM interaction, and one rarely specified publicly.
+
+### Scopes in the C.A.S.A. Model
+
+The following diagram conveys the CASA URI scheme for multi-VM and multi-chain addressing, by analogy to familiar web URLs:
+
+┌────────────────────────────────────────────────────────┐
+│Virtual Machine: assumptions,about runtime  actors, etc │
+│Ex: btc, eip155 (ethereum), solana, cosmos              │
+│┌─────────────────────────────────────────────────────┐ │
+││"Chains": Addressable authorities for public data    │ │
+││Ex: Mainnet, test-nets, private ledgers, sub-graphs  │ │
+││┌──────────────────────────────────────────────────┐ │ │
+│││On-chain entities: Addressable state              │ │ │
+│││Ex: Contracts, registries, wallets, transactions  │ │ │
+│││┌───────────────────────────────────────────────┐ │ │ │
+││││On-chain sub-entities: VM-specific data        │ │ │ │
+││││Ex: A specific NFT or registry entry, metadata │ │ │ │
+││││                                               │ │ │ │
+│││└───────────────────────────────────────────────┘ │ │ │
+││└──────────────────────────────────────────────────┘ │ │
+│└─────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│The Open HTTP(S) Web                                    │
+│┌─────────────────────────────────────────────────────┐ │
+││Authority: Live server at the root of all URLs       │ │
+││┌──────────────────────────────────────────────────┐ │ │
+│││Online entities: Resources, inboxes, endpoints    │ │ │
+│││ addressed via an authority                       │ │ │
+│|│┌───────────────────────────────────────────────┐ │ │ |
+││││Sub-Resources and "Assets"                     │ │ │ │
+│││└───────────────────────────────────────────────┘ │ │ │
+││└──────────────────────────────────────────────────┘ │ │
+│└─────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────┘
+
 ## Specification
 
 ### EIP-1193 and Chain-Focus
 
-The dominant model since the early days of Ethereum has been for dapps to search the Domain Object Model (hereafter DOM, the browser's JSON memory namespace for a given browser<>domain connection), and for users to install  one or more browser extensions that inject a `window.ethereum` object for dapps to find, establishing a conventional interface (the EIP-1193 connection) to all websites at that conventional DOM location.
+The dominant model since the early days of Ethereum has been for dapps to search the Domain Object Model (hereafter DOM, the browser's JSON memory partition for a given browser<>domain connection), and for users to install  one or more browser extensions that inject a `window.ethereum` object for dapps to find, establishing a conventional interface (the EIP-1193 connection) to all websites at that conventional DOM location.
 Over time, many RPC method extensions accrued to this model, but the initial connection was not expressive about the wallet's capabilities so they tend towards "try/fail" approaches to additional interfaces.
 While Metamask now supports [EIP-6963], the original [EIP-1193] connection was pioneered by Metamask, and the latter is often referred to as a "Metamask-style" wallet connection for that reason.
 
-In the early days of Ethereum multi-chain development, a manual flow for adding additional chains beyond mainnet and interacting with one chain at a time per dapp led to the establishment of a "chain focus" approach, where an end-user set the "focused", i.e. currently-active, chain before connecting to a given dapp.
-Many browser-based and mobile wallets inherited this "chain focus" paradigm and even passed it on to hardware wallets, passing along chainId from the "session" when constructing transactions and other messages to be signed.
+In the early days of Ethereum multi-chain development, a manual flow for adding additional chains beyond mainnet and interacting with one chain at a time per dapp led to the establishment of a "chain focus" approach, where an end-user set the "focused", i.e. currently-active, chain in their wallet interface before or sometimes after connecting to a given dapp.
+Many browser-based and mobile wallets inherited this "chain focus" paradigm and even passed it on to hardware wallets, passing along `chainId` and other contextual parameters from the interactive session when constructing transactions and other messages to be signed.
 
 Over time, this gave way to many dapps proposing to wallets their preferred or unique chains, via the [EIP-3085] RPC method `wallet_addEthereumChain`.
-Adding and switching between chains (only one can have "focus" at a time) creates its own security and user-experience hurdles, as does managing multiple addresses, often also allowing only one at a time to have "focus" in user-experience terms.
+Adding and switching between chains (only one can have "focus" at a time) creates its own security and user-experience hurdles. Managing multiple addresses tended towards a "focus" model, adding to the state maintenance and user-experience assumptions expected of wallets (or middleware like hardware-wallet support software).
 
 While EIP-1193 style injection is considered the gold-standard and most widely used across EVM dapp development environments, it also has serious shortcomings.
-The "protocol pollution" issue is a major one, leading to malicious wallets impersonating or even replacing Metamask (by analogy to `user-agent` string impersonation, a long-standing weakness of the HTTP security model) by overwriting or front-running the `window.ethereum` polyfill.
+The "protocol pollution" issue is a major one, leading to malicious wallets impersonating or even replacing Metamask (by analogy to `user-agent` string impersonation, a long-standing weakness of the HTTP security model); this is mostly achieved by overwriting or front-running the `window.ethereum` polyfill.
 Multiple browser extensions could attempt to inject a polyfill there, but race conditions ensued, in that the first to define could also "freeze" the object and block overwriting.
 This interface injected into every page also allows malicious pages to intercept and observe the polyfill, potentially deanonymizing users even without interaction.
 
-Additionally, as dapps using this connection mode traditionally pass wallets fully-formed transactions to confirm and sign rather than forming them more interactively, a widespread pattern of exposing at least one address and chain (usually the one with "focus") at time of connection as a method of authentication.
-Even without connecting to any malicious dapps, this presents real privacy risks.
+Additionally, as dapps using this connection mode traditionally pass wallets fully-formed transactions to confirm and sign rather than forming them more interactively, a widespread pattern has developed whereby wallets expose (or are even expected by dapps to expose automatically) at least one address and chain (usually the ones with "focus") at time of connection.
+This default behavior is sometimes used as "authentication" of that address, which is strictly speaking unsafe as a malicious wallet could claim to control any address; it is also unreliable, as a privacy-maximizing wallet could simply autogenerate a false address to expose to each application.
+Even without malice on the part of applications or wallets, this presents something of an anti-pattern for privacy, without little incentive to buck tyhe trend.
 
 ### EIP-6963
 
@@ -53,8 +150,12 @@ Specifically, the main subject of this specification was how a dapp could, over 
 This combination of an on-chain element (such as that defined in [EIP-4337]) and a user-agent or "signer" authorized to interact with that on-chain element, is often referred to as a "smart wallet" or "hybrid wallet".
 
 Note that the capability/feature flags passed over this `get_capabilities` RPC method are [explicitly partitioned](https://eips.ethereum.org/EIPS/eip-5792#wallet_getcapabilities-example-return-value) by `chainId`, formatted as a bytestring rather than as an ASCII string.
+Over time, a generic (`chainId 0x00`) was added for capabilities that a wallet can provide to any chain in the virtual machine, following the "ChainId 0" convention established years prior by SAFE implementations and integrations.
 
 While [EIP-5792] only defines one such flag, additional ones (perhaps with more complex data shapes) are expected to be defined in forthcoming EIPs.
+
+Note: Since all capabilities are either expressed as chain-specific or VM-specific, it is possible to translate roundtrip and losslessly between the EIP-5792 expression and a CAIP-25 native expression.
+The goal here is that EIP-5792 will help applications abstract over the complexities of multiple possible wallet types and wallet-connection types, so that applications can just encode their core logic at the level of batches of on-chain calls, and shape these batches with capability-discovery signals possible over any connection type.
 
 ### EIP-7715 and `wallet_grantPermissions`
 
@@ -137,6 +238,7 @@ The following is an example taken from the [CAIP-25] specification, which is ins
   }
 }
 ```
+
 #### Example CAIP-25 response
 
 ```JSON
@@ -205,6 +307,7 @@ TBD
 ## Security Considerations
 
 TBD
+
 ## Copyright
 
 Copyright and related rights waived via [CC0](../LICENSE.md).
@@ -224,3 +327,9 @@ Copyright and related rights waived via [CC0](../LICENSE.md).
 [EIP-7710]: https://eips.ethereum.org/EIPS/eip-7710
 [EIP-7715]: https://eips.ethereum.org/EIPS/eip-7715
 [namespaces]: https://namespaces.chainagnostic.org
+[RFC-3986]: https://datatracker.ietf.org/doc/html/rfc3986
+[namespaces]: https://namespaces.chainagnostic.org
+<<<<<<< Updated upstream
+=======
+[RFC-3986]: https://datatracker.ietf.org/doc/html/rfc3986
+>>>>>>> Stashed changes
