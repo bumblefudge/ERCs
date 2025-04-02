@@ -74,9 +74,9 @@ We can establish some terminology upfront to make the following history more cle
 Also:
 
 * **Multi-Chain** refers to transactions, sessions, or other interactions (on-chain or off-) involving two chains (or subgraphs) of a given protocol, whether these involve oracles, bridges, dual-chain nodes, or multiple nodes. For example, a transaction altering state on both Ethereum Mainnet and Base is considered a multi-chain transaction.
-* **Multi-VM** refers to transactions, sessions, or other interactions involving two chains (or subgraphs) of independent protocols. For example, swapping an asset on Ethereum for one on Solana is a multi-VM interaction, and one rarely specified publicly.
+* **Multi-VM** refers to transactions, sessions, or other interactions involving two chains (or subgraphs) of independent protocols. For example, swapping an asset on Ethereum for one on Solana is a multi-VM interaction, and one rarely specified interoperably or subject to direct public discussion and influence.
 
-### Scopes in the C.A.S.A. Model
+### Scopes in the Chain-Agnostic Model
 
 The following diagram conveys the CASA URI scheme for multi-VM and multi-chain addressing, by analogy to familiar web URLs:
 
@@ -98,7 +98,7 @@ The following diagram conveys the CASA URI scheme for multi-VM and multi-chain a
 │└─────────────────────────────────────────────────────┘ │
 └────────────────────────────────────────────────────────┘
 ┌────────────────────────────────────────────────────────┐
-│The Open HTTP(S) Web                                    │
+│Protocols (HTTPS, smtp, ftp, etc)                       │
 │┌─────────────────────────────────────────────────────┐ │
 ││Authority: Live server at the root of all URLs       │ │
 ││┌──────────────────────────────────────────────────┐ │ │
@@ -110,6 +110,12 @@ The following diagram conveys the CASA URI scheme for multi-VM and multi-chain a
 ││└──────────────────────────────────────────────────┘ │ │
 │└─────────────────────────────────────────────────────┘ │
 └────────────────────────────────────────────────────────┘
+
+Applying the general URI scheme defined above, actors and resources are addressed heirarchically by various URI subtypes, all of which follow the general pattern:
+
+`{protocol}:{chain/state identifier}:{entity}[/subentity][?query metadata]`
+
+Subtypes are defined in [CAIPs] (CAIP-10 for accounts, CAIP-19 for assets, etc), and, as needed, each CAIP is profiled per virtual machines, i.e., per ["namespace"][namespaces].
 
 ## Specification
 
@@ -166,18 +172,18 @@ the specification also details how these capabilities negotiated between an on-c
 
 ### CAIP-25 and friends
 
-CAIP-25 takes a more expressive approach than EIP-1193, passing back complex structured objects to negotiate wallet<>dapp connections as an interactive communication.
+CAIP-25 takes a more expressive approach than EIP-1193, passing complex structured objects to and from the wallet (or other user-agent) to negotiate wallet<>app connections as an interactive communication.
 Importantly, these objects can be iterated over time with successive requests to expand or detract the scope of multiple concurrent and partitioned sub-connections, which can be on different chains or even in different VMs and thus distinct sets of RPC methods and ground-assumptions about finality, transaction flow, etc.
-Each of these partitioned permissioning namespaces can include 0 or more addresses, different sets of enabled methods, and even free-form metadata in the form of `scopeProperties` (per partitioned scope) and `sessionProperties` (universal across all of them).
-The biggest deployment to date of a [CAIP-25]-based connection is the websocket-based connection that the Wallet-Connect SDK has bootstrapped since v2.0, so this connection is sometimes referred to as a "Wallet-Connect connection".
+Each of these partitioned permissioning namespaces can include 0 or more addresses, different sets of enabled RPC methods, and even free-form metadata in the form of `scopeProperties` (per partitioned scope) and `sessionProperties` (universal across all of them).
+The biggest deployment to date of a [CAIP-25]-based connection is the websocket-based connection that the Wallet-Connect SDK has bootstrapped since version 2.0 of their connection specification and network. For this reason, a CAIP-25 connection is sometimes referred to as a "Wallet-Connect connection".
 
-[CAIP-27] defines an envelope for wallet<>dapp RPC calls, routing them to the appropriate "permission partition" (whether across a relay architecture, variously stateful components, variously on-chain component, etc).
-This enables concurrent, segmented channels to nodes of multiple chains (or even chains operating different virtual machines and RPC dictionaries), multiplexed by the wallet (or even across multiple wallets).
+[CAIP-27] defines an envelope for wallet<>dapp RPC calls, routing them to the appropriate "permission partition" (whether across a relay architecture, variously stateful components, variously on-chain components, etc).
+This enables concurrent, segmented channels to nodes of multiple chains (or even chains operating different virtual machines and RPC dictionaries), multiplexed by the wallet (or even across multiple wallets, or a multi-device wallet abstraction).
 This breaks from the long-dominant model codified in [ERC-3326] of wallets maintaining "focus" (in user-experience terms) on one chain at a time, allowing instead for multiple chains to be involved in a given transaction approval or user interaction smoothly, getting up-to-the-current-block information about all the relevant chains in parallel.
 
 It is important to note that each of these parallel connections has a unique and very explicitly defined scope of one or more specific chains (identified in ways specific to each "namespace" of chains, usually the identification system of a given virtual machine or "layer 1" chain).
 These identifiers are defined in [CAIP-2] and are tuples of a "namespace" (usually a "shortname" for a registry of chainIds) and a chainId within that namespace.
-You could think of these are context-specified chainIds, to disambiguate in case of collisions such as `mainnet` or `1` being used in multiple distinct ecosystems.
+You could think of these are context-specified chainIds, to disambiguate in case of collisions such as `mainnet` or `1` being used in multiple distinct protocol ecosystems.
 The specification for these "shortnames" (including information on how community developers can contribute light/summary documentation of each namespace and the applicability to it of each CAIP) can be found in [CAIP-104].
 
 For each distinct, partioned connection within a [CAIP-25] connection, a kind of configuration object exists, specified in [CAIP-217], outlining the RPC methods (and notifications) authorized, the [chain-specified CAIP-10][CAIP-10] addresses authorized for that scope.
@@ -326,10 +332,6 @@ Copyright and related rights waived via [CC0](../LICENSE.md).
 [EIP-7702]: https://eips.ethereum.org/EIPS/eip-7702
 [EIP-7710]: https://eips.ethereum.org/EIPS/eip-7710
 [EIP-7715]: https://eips.ethereum.org/EIPS/eip-7715
-[namespaces]: https://namespaces.chainagnostic.org
 [RFC-3986]: https://datatracker.ietf.org/doc/html/rfc3986
+[CAIPs]: https://chainagnostic.org
 [namespaces]: https://namespaces.chainagnostic.org
-<<<<<<< Updated upstream
-=======
-[RFC-3986]: https://datatracker.ietf.org/doc/html/rfc3986
->>>>>>> Stashed changes
